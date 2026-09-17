@@ -34,13 +34,16 @@ export interface DatasetSummary {
   test_samples: number;
   n_features_raw: number;
   n_features_transformed: number;
+  train_samples?: number;
+  calibration_samples?: number;
+  positive_class_rate?: number;
+  negative_class_rate?: number;
+  uploaded_rows?: number;
+  corpus_rows?: number;
+  merge_mode?: string;
 }
 
 export interface BenchmarkResponse {
   dataset_summary: DatasetSummary;
-  models: {
-    xgboost: ModelMetricItem;
-    random_forest: ModelMetricItem;
-    logistic_regression: ModelMetricItem;
-  };
+  models: Record<string, ModelMetricItem>;
 }
