@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   LineChart,
   Line,
@@ -16,36 +16,37 @@ interface RocCurveChartProps {
   benchmarks: BenchmarkResponse;
 }
 
+const COLORS = ['#0d9488', '#3b82f6', '#8b5cf6', '#f59e0b', '#f43f5e'];
+
 export const RocCurveChart: React.FC<RocCurveChartProps> = ({ benchmarks }) => {
-  const xgbCurve = benchmarks.models.xgboost.roc_curve;
-  const rfCurve = benchmarks.models.random_forest.roc_curve;
-  const lrCurve = benchmarks.models.logistic_regression.roc_curve;
-
-  const length = Math.max(xgbCurve.length, rfCurve.length, lrCurve.length);
-  const chartData = [];
-
-  for (let i = 0; i < length; i++) {
-    const pXgb = xgbCurve[i] || xgbCurve[xgbCurve.length - 1];
-    const pRf = rfCurve[i] || rfCurve[rfCurve.length - 1];
-    const pLr = lrCurve[i] || lrCurve[lrCurve.length - 1];
-
-    chartData.push({
-      fpr: pXgb ? pXgb.fpr : (i / (length - 1)),
-      xgboost: pXgb ? pXgb.tpr : 1.0,
-      random_forest: pRf ? pRf.tpr : 1.0,
-      logistic_regression: pLr ? pLr.tpr : 1.0,
-      chance: pXgb ? pXgb.fpr : (i / (length - 1)),
-    });
-  }
+  const entries = Object.entries(benchmarks.models);
+  const chartData = useMemo(() => {
+    const length = Math.max(...entries.map(([, m]) => m.roc_curve.length), 1);
+    const rows = [];
+    for (let i = 0; i < length; i++) {
+      const row: Record<string, number> = {};
+      entries.forEach(([key, model]) => {
+        const point = model.roc_curve[i] || model.roc_curve[model.roc_curve.length - 1];
+        if (point) {
+          row.fpr = point.fpr;
+          row[key] = point.tpr;
+        }
+      });
+      if (row.fpr == null) row.fpr = length > 1 ? i / (length - 1) : 0;
+      row.chance = row.fpr;
+      rows.push(row);
+    }
+    return rows;
+  }, [benchmarks.models]);
 
   return (
     <Card className="p-6">
       <div className="pb-3 mb-4 border-b border-slate-200 dark:border-slate-800">
         <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
-          Receiver Operating Characteristic (ROC Curves)
+          ROC curves
         </h3>
         <p className="text-xs text-slate-500 dark:text-slate-400">
-          True Positive Rate vs. False Positive Rate across classification thresholds
+          True positive rate vs. false positive rate on the held-out test fold
         </p>
       </div>
 
@@ -55,11 +56,11 @@ export const RocCurveChart: React.FC<RocCurveChartProps> = ({ benchmarks }) => {
             <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.2} />
             <XAxis
               dataKey="fpr"
-              label={{ value: 'False Positive Rate (1 - Specificity)', position: 'insideBottom', offset: -5, fontSize: 11, fill: '#94a3b8' }}
+              label={{ value: 'False positive rate', position: 'insideBottom', offset: -5, fontSize: 11, fill: '#94a3b8' }}
               tick={{ fontSize: 10, fill: '#94a3b8' }}
             />
             <YAxis
-              label={{ value: 'True Positive Rate (Sensitivity)', angle: -90, position: 'insideLeft', fontSize: 11, fill: '#94a3b8' }}
+              label={{ value: 'True positive rate', angle: -90, position: 'insideLeft', fontSize: 11, fill: '#94a3b8' }}
               tick={{ fontSize: 10, fill: '#94a3b8' }}
               domain={[0, 1]}
             />
@@ -67,38 +68,18 @@ export const RocCurveChart: React.FC<RocCurveChartProps> = ({ benchmarks }) => {
               contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px', color: '#fff', fontSize: '11px' }}
             />
             <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} />
-            <Line
-              type="monotone"
-              dataKey="xgboost"
-              name={`XGBoost (AUC = ${benchmarks.models.xgboost.roc_auc})`}
-              stroke="#0d9488"
-              strokeWidth={2.5}
-              dot={false}
-            />
-            <Line
-              type="monotone"
-              dataKey="random_forest"
-              name={`Random Forest (AUC = ${benchmarks.models.random_forest.roc_auc})`}
-              stroke="#3b82f6"
-              strokeWidth={2}
-              dot={false}
-            />
-            <Line
-              type="monotone"
-              dataKey="logistic_regression"
-              name={`Logistic Reg (AUC = ${benchmarks.models.logistic_regression.roc_auc})`}
-              stroke="#8b5cf6"
-              strokeWidth={2}
-              dot={false}
-            />
-            <Line
-              type="monotone"
-              dataKey="chance"
-              name="Chance Level (0.50)"
-              stroke="#94a3b8"
-              strokeDasharray="4 4"
-              dot={false}
-            />
+            {entries.map(([key, model], idx) => (
+              <Line
+                key={key}
+                type="monotone"
+                dataKey={key}
+                name={`${model.model_name} (AUC ${model.roc_auc})`}
+                stroke={COLORS[idx % COLORS.length]}
+                strokeWidth={idx === 0 ? 2.5 : 2}
+                dot={false}
+              />
+            ))}
+            <Line type="monotone" dataKey="chance" name="Chance (0.50)" stroke="#94a3b8" strokeDasharray="4 4" dot={false} />
           </LineChart>
         </ResponsiveContainer>
       </div>

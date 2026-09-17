@@ -1,8 +1,8 @@
 import React from 'react';
-import { Activity, BarChart2, History, BookOpen, ShieldCheck } from 'lucide-react';
+import { Activity, Home, History, BookOpen, ShieldCheck, UploadCloud } from 'lucide-react';
 import { ThemeToggle } from '../common/ThemeToggle';
 
-export type TabType = 'diagnostic' | 'benchmarks' | 'history' | 'docs';
+export type TabType = 'home' | 'diagnostic' | 'training' | 'history' | 'docs';
 
 interface NavbarProps {
   activeTab: TabType;
@@ -11,8 +11,9 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ activeTab, onTabChange }) => {
   const tabs = [
+    { id: 'home' as TabType, label: 'Home', icon: <Home className="w-4 h-4" /> },
     { id: 'diagnostic' as TabType, label: 'Diagnostic Assessment', icon: <Activity className="w-4 h-4" /> },
-    { id: 'benchmarks' as TabType, label: 'Model Benchmarks', icon: <BarChart2 className="w-4 h-4" /> },
+    { id: 'training' as TabType, label: 'Model Training', icon: <UploadCloud className="w-4 h-4" /> },
     { id: 'history' as TabType, label: 'Patient Audit Log', icon: <History className="w-4 h-4" /> },
     { id: 'docs' as TabType, label: 'Clinical & API Docs', icon: <BookOpen className="w-4 h-4" /> },
   ];
@@ -22,7 +23,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, onTabChange }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Brand / Logo */}
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => onTabChange('diagnostic')}>
+          <div className="flex items-center gap-3 cursor-pointer" onClick={() => onTabChange('home')}>
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-600 to-emerald-400 flex items-center justify-center text-white shadow-md shadow-teal-500/20">
               <Activity className="w-6 h-6 stroke-[2.5]" />
             </div>
