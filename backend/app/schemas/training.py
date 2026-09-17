@@ -71,6 +71,9 @@ class DatasetSummarySchema(BaseModel):
     n_features_transformed: int
     positive_class_rate: float
     negative_class_rate: float
+    uploaded_rows: Optional[int] = None
+    corpus_rows: Optional[int] = None
+    merge_mode: Optional[str] = None
 
 
 class TrainingResponseSchema(BaseModel):

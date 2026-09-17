@@ -62,8 +62,11 @@ test-results/
 # Application Logs
 # -------------------------
 logs/
-*.log
-backend/logs/
+!backend/logs/
+backend/logs/*.log
+backend/logs/*.log.*
+!backend/logs/.gitkeep
+!backend/logs/README.md
 
 # -------------------------
 # Environment & Configuration Secrets
