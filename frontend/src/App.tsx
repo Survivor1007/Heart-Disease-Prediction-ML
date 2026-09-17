@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { Activity, AlertCircle, Sparkles } from 'lucide-react';
+import { Activity, AlertCircle } from 'lucide-react';
 import { Navbar, TabType } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
+import { Home } from './components/home/Home';
+import { TrainingPage } from './components/training/TrainingPage';
 import { ArchetypeSelector } from './components/diagnostic/ArchetypeSelector';
 import { PatientForm } from './components/diagnostic/PatientForm';
 import { RiskGauge } from './components/diagnostic/RiskGauge';
@@ -9,18 +11,14 @@ import { ConsensusMatrix } from './components/diagnostic/ConsensusMatrix';
 import { ShapWaterfall } from './components/diagnostic/ShapWaterfall';
 import { WhatIfSimulator } from './components/diagnostic/WhatIfSimulator';
 import { ClinicalReportModal } from './components/diagnostic/ClinicalReportModal';
-import { ModelComparisonTable } from './components/benchmarks/ModelComparisonTable';
-import { RocCurveChart } from './components/benchmarks/RocCurveChart';
-import { CalibrationPlot } from './components/benchmarks/CalibrationPlot';
 import { HistoryTable } from './components/history/HistoryTable';
 import { ClinicalRefGuide } from './components/docs_view/ClinicalRefGuide';
 import { ApiRefGuide } from './components/docs_view/ApiRefGuide';
 import { usePrediction } from './hooks/usePrediction';
-import { useBenchmarks } from './hooks/useBenchmarks';
 import { useHistory } from './hooks/useHistory';
 
 export const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<TabType>('diagnostic');
+  const [activeTab, setActiveTab] = useState<TabType>('home');
   const [isReportOpen, setIsReportOpen] = useState<boolean>(false);
 
   // Diagnostic Hook
@@ -36,14 +34,6 @@ export const App: React.FC = () => {
     resetForm,
   } = usePrediction();
 
-  // Benchmarks Hook
-  const {
-    benchmarks,
-    loading: loadingBenchmarks,
-    error: benchmarkError,
-    refetch: refetchBenchmarks,
-  } = useBenchmarks();
-
   // History Hook
   const {
     records,
@@ -58,7 +48,10 @@ export const App: React.FC = () => {
       <Navbar activeTab={activeTab} onTabChange={setActiveTab} />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* TAB 1: DIAGNOSTIC ASSESSMENT */}
+        {/* HOME */}
+        {activeTab === 'home' && <Home onNavigate={setActiveTab} />}
+
+        {/* DIAGNOSTIC ASSESSMENT */}
         {activeTab === 'diagnostic' && (
           <div className="space-y-6">
             {/* Quick Demo Archetypes Bar */}
@@ -132,32 +125,10 @@ export const App: React.FC = () => {
           </div>
         )}
 
-        {/* TAB 2: MODEL BENCHMARKS & JUDGMENT METRICS */}
-        {activeTab === 'benchmarks' && (
-          <div className="space-y-6">
-            {benchmarkError && (
-              <div className="p-4 rounded-xl bg-rose-50 text-rose-800 text-xs">
-                {benchmarkError}
-              </div>
-            )}
+        {/* MODEL TRAINING & JUDGEMENT METRICS */}
+        {activeTab === 'training' && <TrainingPage />}
 
-            {benchmarks ? (
-              <>
-                <ModelComparisonTable benchmarks={benchmarks} />
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <RocCurveChart benchmarks={benchmarks} />
-                  <CalibrationPlot benchmarks={benchmarks} />
-                </div>
-              </>
-            ) : (
-              <div className="py-16 text-center text-slate-400 text-xs">
-                Loading model benchmark metrics...
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* TAB 3: HISTORICAL AUDITS */}
+        {/* HISTORICAL AUDITS */}
         {activeTab === 'history' && (
           <HistoryTable
             records={records}
@@ -168,7 +139,7 @@ export const App: React.FC = () => {
           />
         )}
 
-        {/* TAB 4: CLINICAL & API DOCS */}
+        {/* CLINICAL & API DOCS */}
         {activeTab === 'docs' && (
           <div className="space-y-6">
             <ClinicalRefGuide />
