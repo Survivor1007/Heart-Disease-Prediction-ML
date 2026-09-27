@@ -53,8 +53,11 @@ export const RiskGauge: React.FC<RiskGaugeProps> = ({ prediction, onOpenReport }
   const themeConfig = getColor(prediction.risk_tier);
 
   return (
-    <Card className="p-6 flex flex-col justify-between">
-      <div>
+    <Card variant="glass" className="p-6 flex flex-col justify-between relative overflow-hidden">
+      {/* Subtle glass background glow */}
+      <div className="absolute -top-16 -right-16 w-36 h-36 bg-teal-500/10 dark:bg-teal-400/10 rounded-full blur-3xl pointer-events-none" />
+
+      <div className="relative z-10">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
@@ -102,20 +105,20 @@ export const RiskGauge: React.FC<RiskGaugeProps> = ({ prediction, onOpenReport }
         </div>
 
         {/* Risk Breakdown Indicators */}
-        <div className="grid grid-cols-3 gap-2 text-center text-[11px] font-medium border-t border-slate-100 dark:border-slate-800/80 pt-3 mb-4">
-          <div className="p-1.5 rounded bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-900/60">
+        <div className="grid grid-cols-3 gap-2 text-center text-[11px] font-medium border-t border-slate-200/60 dark:border-white/10 pt-3 mb-4">
+          <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 backdrop-blur-sm">
             Low: &lt;35%
           </div>
-          <div className="p-1.5 rounded bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200/60 dark:border-amber-900/60">
+          <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 backdrop-blur-sm">
             Mod: 35-65%
           </div>
-          <div className="p-1.5 rounded bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 border border-rose-200/60 dark:border-rose-900/60">
+          <div className="p-1.5 rounded-lg bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/20 backdrop-blur-sm">
             High: &gt;65%
           </div>
         </div>
 
         {/* Data Certainty & Imputation Alert */}
-        <div className="p-3 rounded-lg bg-slate-100/80 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/60 mb-4">
+        <div className="p-3 rounded-xl bg-white/40 dark:bg-slate-800/40 border border-white/60 dark:border-white/10 backdrop-blur-md mb-4">
           <div className="flex items-start gap-2">
             <Info className="w-4 h-4 text-teal-600 dark:text-teal-400 mt-0.5 shrink-0" />
             <div>
@@ -135,15 +138,17 @@ export const RiskGauge: React.FC<RiskGaugeProps> = ({ prediction, onOpenReport }
         </div>
       </div>
 
-      <Button
-        variant="outline"
-        size="md"
-        onClick={onOpenReport}
-        leftIcon={<FileText className="w-4 h-4" />}
-        className="w-full"
-      >
-        View & Export Clinical PDF Report
-      </Button>
+      <div className="relative z-10">
+        <Button
+          variant="outline"
+          size="md"
+          onClick={onOpenReport}
+          leftIcon={<FileText className="w-4 h-4" />}
+          className="w-full bg-white/50 dark:bg-slate-800/50 backdrop-blur-md border-white/60 dark:border-white/10 hover:bg-white/70 dark:hover:bg-slate-700/60"
+        >
+          View & Export Clinical PDF Report
+        </Button>
+      </div>
     </Card>
   );
 };
