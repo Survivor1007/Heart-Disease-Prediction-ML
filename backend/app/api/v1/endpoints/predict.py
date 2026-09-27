@@ -22,12 +22,12 @@ router = APIRouter()
     summary="Multi-Model Heart Disease Diagnostic & Explainability Assessment",
     description="Submits core vitals and optional lab markers for calibrated multi-model risk assessment and SHAP feature attribution.",
 )
-def predict_heart_disease(
+async def predict_heart_disease(
     patient: PatientInput,
     request: Request,
     db: AsyncSession = Depends(get_db),
 ) -> PredictionResponse:
-    """Synchronous route dispatched automatically to worker threadpool by FastAPI for non-blocking CPU ML execution."""
+    """Asynchronous endpoint executing inference and persisting audit record in the database."""
     ml_models = getattr(request.app.state, "ml_models", None)
     if not ml_models or "preprocessor" not in ml_models:
         raise HTTPException(
@@ -62,13 +62,11 @@ def predict_heart_disease(
         input_vitals=patient,
     )
 
-    # 3. Asynchronously persist diagnostic audit record
+    # 3. Persist diagnostic audit record
     try:
-        loop = asyncio.get_event_loop()
-        if loop.is_running():
-            asyncio.create_task(save_prediction_log(db, patient, response))
-    except Exception:
-        # Non-blocking log persistence failure should not fail clinical response
-        pass
+        await save_prediction_log(db, patient, response)
+    except Exception as e:
+        print(f"[Audit Error] Failed to persist diagnostic log: {e}")
 
     return response
+
